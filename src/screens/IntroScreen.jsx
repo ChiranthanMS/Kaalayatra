@@ -63,7 +63,7 @@ export default function IntroScreen({ onNavigate }) {
           backgroundImage:
             stage === 'prologue'
               ? "url('/assets/intro_chamber.png')"
-              : "url('/assets/title_vista.jpg')",
+              : "url('/assets/title_vista.png')",
 
           backgroundSize: 'contain',
           backgroundPosition: 'center',
@@ -231,76 +231,99 @@ export default function IntroScreen({ onNavigate }) {
           </div>
 
           {/* =================================================
-              QUICK FEATURE LAUNCHERS
-          ================================================= */}
+    QUICK FEATURE LAUNCHERS
+================================================= */}
 
-          <div className="w-full max-w-2xl mx-auto flex items-center justify-around pb-3">
+<div className="w-full max-w-3xl mx-auto flex items-center justify-around pb-3">
 
-            {[
-              {
-                id: 'world_explore',
-                label: 'EXPLORE',
-                icon: Compass,
-                color:
-                  'from-amber-400 via-amber-600 to-amber-900',
-              },
-              {
-                id: 'puzzle',
-                label: 'SOLVE',
-                icon: Puzzle,
-                color:
-                  'from-sky-400 via-sky-600 to-sky-900',
-              },
-              {
-                id: 'decision',
-                label: 'DECIDE',
-                icon: Cog,
-                color:
-                  'from-orange-400 via-orange-600 to-orange-900',
-              },
-              {
-                id: 'learn',
-                label: 'LEARN',
-                icon: Scroll,
-                color:
-                  'from-emerald-400 via-emerald-600 to-emerald-900',
-              },
-            ].map((btn) => {
-              const Icon = btn.icon;
+  {[
+    {
+      id: 'world_explore',
+      label: 'EXPLORE',
+      image: '/assets/explore_icon.png',
+    },
+    {
+      id: 'puzzle',
+      label: 'SOLVE',
+      image: '/assets/solve_icon.png',
+    },
+    {
+      id: 'decision',
+      label: 'DECIDE',
+      image: '/assets/decide_icon.png',
+    },
+    {
+      id: 'learn',
+      label: 'LEARN',
+      image: '/assets/learn_icon.png',
+    },
+  ].map((btn) => (
+    <button
+      key={btn.id}
+      onClick={() => {
+        sound.playClick();
+        onNavigate(btn.id);
+      }}
+      className="
+        flex flex-col items-center
+        gap-2
+        group
+        transition-transform
+        hover:-translate-y-2
+        active:scale-95
+        cursor-pointer
+        bg-transparent
+        border-0
+        appearance-none
+      "
+    >
 
-              return (
-                <button
-                  key={btn.id}
-                  onClick={() => {
-                    sound.playClick();
-                    onNavigate(btn.id);
-                  }}
-                  className="flex flex-col items-center gap-1.5 group transition-transform hover:-translate-y-1.5 cursor-pointer"
-                >
+      {/* Generated Game Icon */}
+<div
+  className="
+    w-20 h-20
+    sm:w-24 sm:h-24
+    md:w-28 md:h-28
+    flex items-center justify-center
+    transition-transform
+    duration-200
+    group-hover:scale-105
+    bg-transparent
+  "
+>
+  <img
+    src={btn.image}
+    alt={btn.label}
+    className="
+      w-full
+      h-full
+      object-contain
+      bg-transparent
+      drop-shadow-[0_8px_10px_rgba(0,0,0,0.55)]
+    "
+  />
+</div>
 
-                  <div
-                    className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-br ${btn.color} p-1 border-3 border-amber-200 shadow-xl group-hover:shadow-amber-400/70 flex items-center justify-center`}
-                  >
+      {/* Label */}
+      <span
+        className="
+          font-cinzel
+          text-sm
+          sm:text-base
+          md:text-lg
+          tracking-widest
+          text-amber-100
+          font-black
+          drop-shadow-[0_3px_4px_rgba(0,0,0,0.9)]
+        "
+      >
+        {btn.label}
+      </span>
 
-                    <div className="w-full h-full rounded-full bg-stone-950/85 flex items-center justify-center group-hover:bg-stone-900/60 transition-colors">
+    </button>
+  ))}
 
-                      <Icon
-                        className="w-6 h-6 sm:w-7 sm:h-7 text-amber-200 group-hover:scale-110 transition-transform"
-                      />
-
-                    </div>
-
-                  </div>
-
-                  <span className="font-cinzel text-[11px] sm:text-xs tracking-widest text-amber-200 font-black drop-shadow">
-                    {btn.label}
-                  </span>
-
-                </button>
-              );
-            })}
-
-          </div>
+</div>
 
         </div>
       )}

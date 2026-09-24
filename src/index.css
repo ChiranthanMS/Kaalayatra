@@ -518,6 +518,9 @@ html, body, #root {
 .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* Colors & Gradients */
+.bg-transparent { background-color: transparent; }
+.appearance-none { appearance: none; -webkit-appearance: none; }
+.border-0 { border: 0; }
 .text-white { color: #ffffff; }
 .text-stone-200 { color: #e7e5e4; }
 .text-stone-300 { color: #d6d3d1; }
