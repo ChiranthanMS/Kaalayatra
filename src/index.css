@@ -297,6 +297,197 @@ html, body, #root {
   display: none;
 }
 
+/* Decision cards */
+.decision-card {
+  overflow: visible;
+  border: 2px solid #9b672e;
+  border-radius: 12px;
+  background:
+    radial-gradient(circle at 20% 15%, rgba(255, 255, 255, 0.45), transparent 28%),
+    repeating-linear-gradient(0deg, rgba(126, 76, 28, 0.035) 0 1px, transparent 1px 5px),
+    linear-gradient(150deg, #fff2c9 0%, #f8e2ae 58%, #e6c47f 100%);
+  box-shadow: 0 12px 22px rgba(38, 18, 7, 0.5), inset 0 0 0 1px rgba(255, 250, 207, 0.75), inset 0 0 24px rgba(153, 94, 29, 0.18);
+}
+
+.decision-card::before {
+  content: '';
+  position: absolute;
+  inset: 7px;
+  pointer-events: none;
+  border: 1px solid rgba(151, 91, 34, 0.45);
+  border-radius: 7px;
+}
+
+.decision-card-selected {
+  border-color: #f4c94f;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 255, 222, 0.7), transparent 32%),
+    repeating-linear-gradient(0deg, rgba(126, 76, 28, 0.03) 0 1px, transparent 1px 5px),
+    linear-gradient(150deg, #fff8d9 0%, #f9e8b5 58%, #eacb83 100%);
+  box-shadow: 0 0 0 2px rgba(255, 214, 85, 0.45), 0 0 28px rgba(255, 193, 43, 0.85), 0 14px 24px rgba(38, 18, 7, 0.5), inset 0 0 24px rgba(204, 137, 30, 0.2);
+}
+
+.decision-card-unselected:hover {
+  border-color: #d5a83e;
+  box-shadow: 0 16px 26px rgba(38, 18, 7, 0.55), 0 0 12px rgba(212, 167, 44, 0.35), inset 0 0 0 1px rgba(255, 250, 207, 0.75), inset 0 0 24px rgba(153, 94, 29, 0.18);
+}
+
+.decision-card-badge {
+  position: absolute;
+  z-index: 4;
+  top: -30px;
+  left: 50%;
+  display: flex;
+  width: 62px;
+  height: 62px;
+  align-items: center;
+  justify-content: center;
+  transform: translateX(-50%);
+  border: 4px solid #d5a83e;
+  border-radius: 999px;
+  background: radial-gradient(circle at 35% 25%, #6b4225, #321b0e 70%);
+  color: #f5ce67;
+  font-family: 'Cinzel', serif;
+  font-size: 34px;
+  font-weight: 900;
+  line-height: 1;
+  text-shadow: 0 2px 2px #140a05;
+  box-shadow: 0 4px 0 #6b3d1b, 0 7px 12px rgba(36, 16, 5, 0.6), inset 0 2px 4px rgba(255, 229, 145, 0.45);
+}
+
+.decision-card-selected-pill {
+  position: absolute;
+  z-index: 3;
+  top: 14px;
+  right: 16px;
+  padding: 3px 10px;
+  border: 1px solid #c18b1e;
+  border-radius: 999px;
+  background: linear-gradient(#ffe27a, #e9aa1d);
+  color: #321b0e;
+  font-family: 'Cinzel', serif;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  box-shadow: 0 2px 5px rgba(63, 31, 8, 0.35);
+}
+
+.decision-card-main {
+  position: relative;
+  z-index: 1;
+  margin-top: 18px;
+}
+
+.decision-card-illustration {
+  display: flex;
+  width: 132px;
+  height: 132px;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border: 5px solid #c38a2b;
+  border-radius: 999px;
+  background: radial-gradient(circle at 35% 25%, #fff7cb, #e6b75f 72%, #8a531e 100%);
+  box-shadow: 0 3px 6px rgba(68, 30, 8, 0.45), inset 0 0 0 2px rgba(255, 239, 163, 0.8), inset 0 0 12px rgba(104, 54, 15, 0.3);
+}
+
+.decision-card-illustration-selected {
+  border-color: #f0c84f;
+  box-shadow: 0 0 16px rgba(255, 201, 54, 0.65), 0 3px 6px rgba(68, 30, 8, 0.45), inset 0 0 0 2px rgba(255, 247, 191, 0.9), inset 0 0 12px rgba(104, 54, 15, 0.22);
+}
+
+.decision-card-title {
+  max-width: 265px;
+  text-shadow: 0 1px 0 rgba(255, 241, 190, 0.75);
+}
+
+.decision-card-description {
+  position: relative;
+  z-index: 1;
+  min-height: 76px;
+  margin: 8px 4px 0;
+}
+
+.decision-card-check-wrap {
+  position: relative;
+  z-index: 1;
+  margin-top: 5px;
+}
+
+.decision-card-check {
+  display: flex;
+  width: 26px;
+  height: 26px;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #8d6b43;
+  border-radius: 999px;
+  background: #77736b;
+  color: #3b2010;
+}
+
+.decision-card-check-selected {
+  border-color: #fff0a5;
+  background: #f2b92e;
+  box-shadow: 0 0 12px rgba(255, 198, 44, 0.75), inset 0 1px 2px rgba(255, 247, 180, 0.8);
+}
+
+.decision-card-ornament {
+  position: absolute;
+  z-index: 1;
+  color: #9a622d;
+  font-size: 15px;
+  opacity: 0.8;
+}
+
+.decision-card-ornament-left {
+  bottom: 10px;
+  left: 12px;
+}
+
+.decision-card-ornament-right {
+  top: 12px;
+  right: 12px;
+}
+
+.decision-card-ornament::after {
+  content: '';
+  position: absolute;
+  top: 5px;
+  left: 4px;
+  width: 22px;
+  height: 1px;
+  background: #b37b3d;
+  opacity: 0.55;
+}
+
+.decision-card-ornament-right::after {
+  right: 4px;
+  left: auto;
+}
+
+.decision-card .decision-card-ornament + .decision-card-ornament {
+  pointer-events: none;
+}
+
+@media (max-width: 640px) {
+  .decision-card-illustration {
+    width: 112px;
+    height: 112px;
+  }
+
+  .decision-card-badge {
+    top: -25px;
+    width: 54px;
+    height: 54px;
+    font-size: 29px;
+  }
+
+  .decision-card-main {
+    margin-top: 11px;
+  }
+}
+
 /* Game Style Action Buttons */
 .btn-gold {
   background: linear-gradient(180deg, #fce07a 0%, #d49f2b 50%, #9e6d0a 100%);
