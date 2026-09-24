@@ -231,15 +231,15 @@ export default function DrainagePuzzleScreen({ onNavigate, onCompleteChallenge }
         className="absolute inset-0 bg-cover bg-center transition-all duration-700"
         style={{
           backgroundImage: `url('/assets/drainage_puzzle_bg.jpg')`,
-          filter: 'brightness(0.9)'
-        }}
-      >
-        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/20 to-black/80"></div>
-      </div>
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
+}}
+      />
 
       {/* Top Header - Matching PDF Page 4 */}
-      <div className="relative z-10 flex flex-col items-center text-center">
-        <h2 className="font-cinzel text-2xl sm:text-3xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-100 via-amber-300 to-amber-500 drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)]">
+      <div className="relative z-10 flex flex-col items-center text-center" style={{ transform: 'translateY(88px)' }}>
+        <h2 className="font-cinzel text-2xl sm:text-3xl md:text-4xl font-black text-[#D4A72C] drop-shadow-[0_2px_4px_rgba(43,26,14,0.9)]">
           DESIGN THE DRAINAGE SYSTEM
         </h2>
         <p className="font-philosopher text-xs sm:text-base text-amber-200/90 font-semibold drop-shadow">

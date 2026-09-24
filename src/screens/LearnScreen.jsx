@@ -11,33 +11,33 @@ export default function LearnScreen({ onNavigate }) {
   return (
     <div className="w-full h-full relative overflow-hidden flex flex-col justify-between p-4 sm:p-8 pt-16 bg-[#18100a] text-amber-100 select-none">
       {/* Background Graphic */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center opacity-40"
-        style={{
-          backgroundImage: `url('/assets/drainage_puzzle_bg.jpg')`,
-          filter: 'blur(3px)'
-        }}
-      >
-        <div className="absolute inset-0 bg-gradient-to-t from-[#140b07] via-[#1a0f0a]/90 to-[#140b07]"></div>
-      </div>
+      <div
+  className="absolute inset-0 bg-cover bg-center"
+  style={{
+    backgroundImage: `url('/assets/urban_sanitation_bg.png')`,
+    filter: 'none',
+  }}
+>
+  <div className="absolute inset-0 bg-black/10"></div>
+</div>
 
       {/* Top Banner */}
-      <div className="relative z-10 flex items-center justify-between">
+      <div className="relative z-10 mt-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 border-2 border-amber-200 flex items-center justify-center shadow-lg shadow-amber-500/40">
             <Lightbulb className="w-5 h-5 text-amber-950 animate-pulse" />
           </div>
           <div>
-            <span className="text-[11px] font-cinzel tracking-widest text-amber-400 font-bold uppercase">
+            <span className="text-[11px] font-cinzel tracking-widest text-amber-300 font-bold uppercase drop-shadow-[0_0_6px_rgba(255,215,106,0.55)]">
               Historical Engineering Knowledge
             </span>
-            <h2 className="font-cinzel text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-100 via-amber-300 to-amber-500">
+            <h2 className="font-cinzel text-2xl sm:text-3xl font-black text-amber-200 drop-shadow-[0_0_8px_rgba(255,215,106,0.5)]">
               URBAN SANITATION BLUEPRINT
             </h2>
           </div>
         </div>
 
-        <div className="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full bg-amber-950/80 border border-amber-600/60 text-xs font-cinzel text-amber-200">
+        <div className="hidden sm:flex self-start mt-1 items-center gap-2 px-3 py-1 rounded-full bg-[#24160f]/95 border border-[#D4AF37]/80 text-xs font-cinzel text-amber-200 shadow-[0_0_10px_rgba(212,175,55,0.25)]">
           <span>+50 Knowledge XP Preview</span>
         </div>
       </div>
