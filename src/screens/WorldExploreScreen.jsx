@@ -10,16 +10,17 @@ export default function WorldExploreScreen({ onNavigate }) {
   const [isSprinting, setIsSprinting] = useState(false);
   const [nearElder, setNearElder] = useState(false);
   const [dialogueHint, setDialogueHint] = useState("Walk to the City Elder near the canal.");
+  const [selectedNpc, setSelectedNpc] = useState(null);
 
   // City Elder location
   const elderPos = { x: 380, y: 460, name: "City Elder", role: "Harappan Master Planner" };
 
   // Other NPCs in the city
   const npcs = [
-    { id: 1, name: "Clay Potter", x: 220, y: 380, icon: "🏺", greeting: "Finest painted terracotta pots in the lower town!" },
-    { id: 2, name: "Textile Merchant", x: 740, y: 440, icon: "🧵", greeting: "Spun cotton dyed in vibrant madder red!" },
-    { id: 3, name: "Granary Worker", x: 580, y: 260, icon: "🌾", greeting: "The great granary is well stocked for the season." },
-    { id: 4, name: "Boatman", x: 760, y: 160, icon: "⛵", greeting: "The river carries trade beads all the way to Mesopotamia!" }
+    { id: 1, name: "Clay Potter", x: 220, y: 380, asset: '/assets/clay_potter.png', greeting: "I shape clay from the river into pots for everyday use." },
+    { id: 2, name: "Textile Merchant", x: 740, y: 440, asset: '/assets/textile_merchant.png', greeting: "Fine textiles from our city are traded far and wide." },
+    { id: 3, name: "Granary Worker", x: 580, y: 260, asset: '/assets/granary_worker.png', greeting: "We store grains from the farms for the whole city." },
+    { id: 4, name: "Boatman", x: 760, y: 160, asset: '/assets/boatman.png', greeting: "I help people and goods travel across the river." }
   ];
 
   const canvasRef = useRef(null);
@@ -154,20 +155,9 @@ export default function WorldExploreScreen({ onNavigate }) {
       <div 
         className="absolute inset-0 bg-cover bg-center transition-all duration-300"
         style={{
-          backgroundImage: `url('/assets/world_isometric.jpg')`,
-          filter: 'brightness(0.95)'
+          backgroundImage: `url('/assets/world_isometric.png')`
         }}
-      >
-        {/* Dynamic Water Animation Overlay over the canal */}
-        <div 
-          className="absolute inset-0 pointer-events-none opacity-40 mix-blend-screen"
-          style={{
-            background: 'linear-gradient(45deg, transparent 40%, rgba(56, 189, 248, 0.4) 50%, transparent 60%)',
-            backgroundSize: '200% 200%',
-            animation: 'waterFlowAnim 4s linear infinite'
-          }}
-        ></div>
-      </div>
+      />
 
       {/* Interactive Entity Layer Canvas / Overlay */}
       <div 
@@ -177,10 +167,15 @@ export default function WorldExploreScreen({ onNavigate }) {
       >
         {/* City Elder NPC with Animated [!] Quest Marker */}
         <div 
-          onClick={(e) => { e.stopPropagation(); handleTalkToElder(); }}
           style={{ left: `${(elderPos.x / 960) * 100}%`, top: `${(elderPos.y / 600) * 100}%` }}
-          className="absolute -translate-x-1/2 -translate-y-full cursor-pointer group z-30"
+          className="absolute -translate-x-1/2 -translate-y-full group z-30"
         >
+          {selectedNpc === 'elder' && (
+            <div className="absolute bottom-full left-1/2 z-50 mb-2 w-48 -translate-x-1/2 pointer-events-none parchment-box npc-dialogue-popup px-3 py-2 text-center font-philosopher text-xs leading-snug text-amber-950">
+              Our city thrives because of the canal and its people.
+            </div>
+          )}
+
           {/* Quest Icon Exclamation Mark */}
           <div className="flex flex-col items-center quest-marker">
             <div className="w-7 h-7 rounded-full bg-gradient-to-br from-amber-300 via-amber-500 to-amber-700 border-2 border-white shadow-lg shadow-amber-500/80 flex items-center justify-center font-black text-amber-950 text-sm">
@@ -191,10 +186,11 @@ export default function WorldExploreScreen({ onNavigate }) {
 
           {/* Elder Avatar Indicator */}
           <div className="mt-1 flex flex-col items-center">
-            <div className="w-12 h-12 rounded-full border-2 border-amber-300 bg-amber-950/80 p-0.5 shadow-xl group-hover:scale-110 transition-transform overflow-hidden">
-              <div className="w-full h-full rounded-full bg-gradient-to-b from-amber-700 to-stone-900 flex items-center justify-center text-xl">
-                👳‍♂️
-              </div>
+              <div
+                onClick={(e) => { e.stopPropagation(); sound.playClick(); setSelectedNpc('elder'); handleTalkToElder(); }}
+                className="w-16 h-16 rounded-full border-2 border-amber-300 bg-amber-950/80 p-0.5 shadow-xl group-hover:scale-110 transition-transform overflow-hidden cursor-pointer"
+              >
+                <img src="/assets/city_elder.png" alt="City Elder" className="w-full h-full object-contain" style={{ filter: 'drop-shadow(0 0 1px #D4AF37) drop-shadow(0 0 4px rgba(255, 215, 106, 0.7))' }} />
             </div>
             <span className="mt-1 px-2 py-0.5 rounded bg-amber-950/90 border border-amber-500 text-[10px] font-cinzel font-bold text-amber-200 tracking-wider whitespace-nowrap shadow">
               {elderPos.name}
@@ -207,15 +203,18 @@ export default function WorldExploreScreen({ onNavigate }) {
           <div
             key={npc.id}
             style={{ left: `${(npc.x / 960) * 100}%`, top: `${(npc.y / 600) * 100}%` }}
-            className="absolute -translate-x-1/2 -translate-y-full cursor-pointer group opacity-90 hover:opacity-100 transition-opacity"
-            onClick={(e) => {
-              e.stopPropagation();
-              sound.playClick();
-              alert(`${npc.name}: "${npc.greeting}"`);
-            }}
+            className="absolute -translate-x-1/2 -translate-y-full group opacity-90 hover:opacity-100 transition-opacity"
           >
-            <div className="w-9 h-9 rounded-full bg-stone-900/80 border border-amber-600 flex items-center justify-center text-base shadow-md group-hover:scale-110 transition-transform">
-              {npc.icon}
+            {selectedNpc === npc.id && (
+              <div className="absolute bottom-full left-1/2 z-50 mb-2 w-48 -translate-x-1/2 pointer-events-none parchment-box npc-dialogue-popup px-3 py-2 text-center font-philosopher text-xs leading-snug text-amber-950">
+                {npc.greeting}
+              </div>
+            )}
+            <div
+              onClick={(e) => { e.stopPropagation(); sound.playClick(); setSelectedNpc(npc.id); }}
+              className="w-14 h-14 rounded-full bg-stone-900/80 border border-amber-600 flex items-center justify-center text-base shadow-md group-hover:scale-110 transition-transform overflow-hidden cursor-pointer"
+            >
+              <img src={npc.asset} alt={npc.name} className="w-full h-full object-contain" style={{ filter: 'drop-shadow(0 0 1px #D4AF37) drop-shadow(0 0 4px rgba(255, 215, 106, 0.7))' }} />
             </div>
             <span className="hidden group-hover:block absolute top-full mt-1 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded bg-black/80 text-[9px] font-philosopher text-amber-200 whitespace-nowrap border border-amber-800">
               {npc.name}
@@ -234,11 +233,11 @@ export default function WorldExploreScreen({ onNavigate }) {
           {/* Explorer Avatar */}
           <div className={`relative flex flex-col items-center ${isMoving ? 'animate-bounce' : ''}`}>
             {/* Backpack tag */}
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-sky-400 via-sky-600 to-amber-900 border-2 border-white shadow-xl flex items-center justify-center text-lg">
-              🎒
+            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-sky-400 via-sky-600 to-amber-900 border-2 border-white shadow-xl flex items-center justify-center text-lg">
+              <img src="/assets/ved.png" alt="Ved" className="w-full h-full object-contain" style={{ filter: 'drop-shadow(0 0 1px #D4AF37) drop-shadow(0 0 4px rgba(255, 215, 106, 0.7))' }} />
             </div>
             <div className="px-2 py-0.5 rounded-full bg-sky-950/90 border border-sky-400 text-[9px] font-cinzel font-bold text-sky-200 shadow mt-0.5">
-              Player (Raj)
+              VED
             </div>
           </div>
         </div>
@@ -262,12 +261,10 @@ export default function WorldExploreScreen({ onNavigate }) {
 
         {/* Minimap (Top-Right) */}
         <div className="w-28 h-28 sm:w-36 sm:h-36 rounded-xl carved-tablet p-1.5 shadow-2xl border-2 border-amber-400 pointer-events-auto bg-stone-950/90 relative overflow-hidden">
-          <div className="w-full h-full rounded-lg bg-[#3a2517] relative flex items-center justify-center">
-            {/* Minimap River Path */}
-            <div className="absolute right-0 top-0 bottom-0 w-8 bg-sky-600/70 border-l border-sky-400"></div>
-            {/* Minimap Street Grid */}
-            <div className="absolute inset-x-0 h-2 top-1/2 -translate-y-1/2 bg-amber-900/60"></div>
-            <div className="absolute inset-y-0 w-2 left-1/3 bg-amber-900/60"></div>
+          <div
+            className="w-full h-full rounded-lg relative flex items-center justify-center bg-cover bg-center"
+            style={{ backgroundImage: "url('/assets/world_isometric.png')" }}
+          >
 
             {/* Elder Marker on Minimap */}
             <div 
@@ -304,34 +301,34 @@ export default function WorldExploreScreen({ onNavigate }) {
       {/* Bottom Controls: Virtual D-Pad (Left) & Action Buttons (Right) - Matching PDF Page 2 */}
       <div className="relative z-30 flex items-end justify-between p-4 pointer-events-none">
         {/* Virtual D-Pad / Joystick (Bottom-Left) */}
-        <div className="pointer-events-auto grid grid-cols-3 gap-1 bg-stone-950/80 p-2 rounded-2xl border border-amber-700/60 shadow-2xl backdrop-blur-sm">
+        <div className="pointer-events-auto grid grid-cols-3 gap-1 bg-[#24160f]/90 p-2 rounded-2xl border border-amber-700/70 shadow-2xl backdrop-blur-sm">
           <div></div>
           <button 
             onClick={() => handleDPadPress('up')}
-            className="w-10 h-10 rounded-lg bg-stone-800 active:bg-amber-600 border border-amber-500/40 flex items-center justify-center text-amber-200"
+            className="w-10 h-10 rounded-lg bg-[#4a2d1b] active:bg-amber-700 border border-amber-500/60 flex items-center justify-center text-amber-100 shadow-[0_0_8px_rgba(212,175,55,0.2)]"
           >
             <ChevronUp className="w-5 h-5" />
           </button>
           <div></div>
           <button 
             onClick={() => handleDPadPress('left')}
-            className="w-10 h-10 rounded-lg bg-stone-800 active:bg-amber-600 border border-amber-500/40 flex items-center justify-center text-amber-200"
+            className="w-10 h-10 rounded-lg bg-[#4a2d1b] active:bg-amber-700 border border-amber-500/60 flex items-center justify-center text-amber-100 shadow-[0_0_8px_rgba(212,175,55,0.2)]"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
-          <div className="w-10 h-10 rounded-lg bg-stone-900 border border-amber-800/40 flex items-center justify-center text-[10px] font-cinzel text-amber-400/80 font-bold">
+          <div className="w-10 h-10 rounded-lg bg-[#2f1d12] border border-amber-800/60 flex items-center justify-center text-[10px] font-cinzel text-amber-300/90 font-bold shadow-[inset_0_0_8px_rgba(0,0,0,0.35)]">
             MOVE
           </div>
           <button 
             onClick={() => handleDPadPress('right')}
-            className="w-10 h-10 rounded-lg bg-stone-800 active:bg-amber-600 border border-amber-500/40 flex items-center justify-center text-amber-200"
+            className="w-10 h-10 rounded-lg bg-[#4a2d1b] active:bg-amber-700 border border-amber-500/60 flex items-center justify-center text-amber-100 shadow-[0_0_8px_rgba(212,175,55,0.2)]"
           >
             <ChevronRight className="w-5 h-5" />
           </button>
           <div></div>
           <button 
             onClick={() => handleDPadPress('down')}
-            className="w-10 h-10 rounded-lg bg-stone-800 active:bg-amber-600 border border-amber-500/40 flex items-center justify-center text-amber-200"
+            className="w-10 h-10 rounded-lg bg-[#4a2d1b] active:bg-amber-700 border border-amber-500/60 flex items-center justify-center text-amber-100 shadow-[0_0_8px_rgba(212,175,55,0.2)]"
           >
             <ChevronDown className="w-5 h-5" />
           </button>

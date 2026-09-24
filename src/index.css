@@ -292,6 +292,11 @@ html, body, #root {
 .parchment-box::before { top: 6px; left: 8px; }
 .parchment-box::after { top: 6px; right: 8px; }
 
+.npc-dialogue-popup::before,
+.npc-dialogue-popup::after {
+  display: none;
+}
+
 /* Game Style Action Buttons */
 .btn-gold {
   background: linear-gradient(180deg, #fce07a 0%, #d49f2b 50%, #9e6d0a 100%);
