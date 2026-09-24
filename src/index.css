@@ -68,6 +68,177 @@ html, body, #root {
   border: 1px solid rgba(223, 177, 65, 0.3);
 }
 
+.bharat-map-backdrop {
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.bharat-map-overlay {
+  background:
+    linear-gradient(90deg, rgba(20, 10, 4, 0.42), rgba(20, 10, 4, 0.04) 62%, rgba(20, 10, 4, 0.5)),
+    linear-gradient(180deg, rgba(20, 9, 3, 0.38), transparent 35%, rgba(20, 9, 3, 0.45));
+}
+
+.bharat-map-title {
+  top: 68px;
+  left: 28px;
+}
+
+.bharat-expedition-status {
+  top: 78px;
+  right: 36px;
+  width: min(360px, calc(100% - 72px));
+  min-height: 82px;
+  padding: 12px 18px;
+  gap: 24px;
+  background: rgba(36, 20, 7, 0.9);
+  border-color: rgba(223, 177, 65, 0.75);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 234, 121, 0.12);
+}
+
+.bharat-expedition-status > div:first-child {
+  flex: 1;
+}
+
+.bharat-expedition-copy,
+.bharat-expedition-progress {
+  display: flex;
+  flex-direction: column;
+  white-space: nowrap;
+}
+
+.bharat-expedition-copy {
+  align-items: flex-start;
+  gap: 3px;
+}
+
+.bharat-expedition-progress {
+  align-items: center;
+  gap: 2px;
+  text-align: center;
+}
+
+.bharat-expedition-status > div:last-child {
+  min-width: 104px;
+  padding-left: 18px;
+}
+
+.bharat-map-plane {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.bharat-map-overlay-layer {
+  pointer-events: none;
+}
+
+.bharat-map-plane button {
+  pointer-events: auto;
+}
+
+.bharat-map-card {
+  width: min(470px, 40%);
+  padding: 22px;
+  pointer-events: auto;
+}
+
+.bharat-map-card-meta {
+  padding-bottom: 10px;
+}
+
+.bharat-map-card-challenges,
+.bharat-map-card-period {
+  font-size: 13px;
+}
+
+.bharat-map-card-title {
+  margin-top: 12px;
+  font-size: 25px;
+}
+
+.bharat-map-card-location {
+  margin-top: 7px;
+  font-size: 16px;
+  line-height: 1.35;
+}
+
+.bharat-map-card-description {
+  margin-top: 14px;
+  font-size: 18px;
+  line-height: 1.5;
+}
+
+.bharat-map-card-discoveries {
+  gap: 8px;
+  margin-top: 16px;
+  padding: 12px;
+  font-size: 14px;
+}
+
+.bharat-map-card-discovery-row {
+  gap: 12px;
+}
+
+.bharat-map-card-actions {
+  margin-top: 16px;
+  padding-top: 14px;
+}
+
+@media (max-width: 640px) {
+  .bharat-map-title {
+    top: 66px;
+    left: 16px;
+  }
+
+  .bharat-map-card {
+    width: calc(100% - 2rem);
+    padding: 16px;
+  }
+
+  .bharat-map-card-title {
+    margin-top: 9px;
+    font-size: 20px;
+  }
+
+  .bharat-map-card-location {
+    margin-top: 5px;
+    font-size: 14px;
+  }
+
+  .bharat-map-card-description {
+    margin-top: 10px;
+    font-size: 16px;
+  }
+
+  .bharat-map-card-discoveries {
+    margin-top: 12px;
+    padding: 10px;
+    font-size: 12px;
+  }
+
+  .bharat-map-card-actions {
+    margin-top: 12px;
+    padding-top: 10px;
+  }
+
+  .bharat-expedition-status {
+    top: 74px;
+    right: 16px;
+    width: calc(100% - 32px);
+    min-height: 74px;
+    padding: 10px 14px;
+    gap: 12px;
+  }
+
+  .bharat-expedition-status > div:last-child {
+    min-width: 96px;
+    padding-left: 12px;
+  }
+}
+
 @media (max-width: 1024px) {
   .game-stage {
     aspect-ratio: auto;

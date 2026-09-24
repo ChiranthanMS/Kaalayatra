@@ -223,7 +223,7 @@ export default function IntroScreen({ onNavigate }) {
                 sound.playClick();
                 setStage('prologue');
               }}
-              className="text-xs text-amber-300/90 hover:text-amber-100 font-philosopher underline tracking-wider px-3 py-1 rounded bg-black/50 border border-amber-800/60"
+              className="btn-gold text-xs sm:text-sm px-4 py-2 shadow-lg flex items-center gap-1.5"
             >
               ◀ View Artifact Chamber Prologue
             </button>
