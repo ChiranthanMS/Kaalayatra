@@ -40,15 +40,16 @@ export default function DialogueScreen({ onNavigate }) {
   return (
     <div className="w-full h-full relative overflow-hidden flex flex-col justify-end p-4 sm:p-8 pt-16 bg-stone-950 text-amber-100 select-none">
       {/* Cinematic Background (Matching PDF Page 3) */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center transition-all duration-500"
-        style={{
-          backgroundImage: `url('/assets/elder_dialogue.jpg')`,
-          filter: 'brightness(0.95)'
-        }}
-      >
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/40"></div>
-      </div>
+      <div
+  className="absolute inset-0 z-0"
+  style={{
+    backgroundImage: "url('/assets/elder_dialogue.png')",
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat',
+    backgroundColor: '#000',
+  }}
+/>
 
       {/* Main Dialogue Parchment Panel (Matching Page 3 layout) */}
       <div className="relative z-20 w-full max-w-5xl mx-auto parchment-box p-4 sm:p-6 shadow-2xl animate-fade-in border-3 border-[#c49a58]">
