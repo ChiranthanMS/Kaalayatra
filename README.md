@@ -1,4 +1,4 @@
-# KaalaYatra — The Living India Game
+# KaalaYatra — The Living Indian Game
 
 A game-based learning platform that teaches Indian history, geography, and culture through interactive storytelling, exploration, and decision-making.
 
