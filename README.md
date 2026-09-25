@@ -36,7 +36,7 @@ The game aligns with NEP 2020 and NCF 2023 curriculum goals, making humanities l
 ---
 
 ## Prototype — What's Built
-🔗 **[▶️ Try the Live KALAYATRA Prototype](https://kaalayatraindiagame.vercel.app/)**
+🔗 **[▶️ Try the Live KAALAYATRA Prototype](https://kaalayatraindiagame.vercel.app/)**
 
 This repository is the **interactive UI prototype** built with React + Vite. It covers the full game flow across 10 screens:
 
