@@ -2,6 +2,80 @@ import React, { useState, useEffect, useRef } from 'react';
 import { MessageSquare, Zap, Compass, Footprints, ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import sound from '../utils/SoundEngine';
 
+/* ─────────────────────────────────────────────
+   SPRITE SHEET  —  spritesheet.png
+   Sheet: 1536 × 1024  →  6 cols × 4 rows
+   Each frame: 256 × 256 px
+
+   Row 0 = DOWN  (front / south)
+   Row 1 = UP    (back  / north)
+   Row 2 = LEFT  (west)
+   Row 3 = RIGHT (east)
+
+   All 6 cols are walk frames.
+   Idle = freeze on col 0 of current row.
+───────────────────────────────────────────────── */
+const FRAME_W   = 256;
+const FRAME_H   = 256;
+const SHEET_W   = 1536;  // 6 cols
+const SHEET_H   = 1024;  // 4 rows
+const WALK_COLS = 6;
+const ANIM_FPS  = 9;
+const RENDER_SIZE = 80;
+const SCALE       = RENDER_SIZE / FRAME_W;
+
+const DIRECTION_ROW = { down: 0, up: 1, left: 2, right: 3 };
+
+/**
+ * VedSprite — renders the correct frame from spritesheet.png.
+ * facing  : 'down' | 'up' | 'left' | 'right'
+ * isMoving: boolean
+ */
+function VedSprite({ facing, isMoving }) {
+  const frameRef  = useRef(0);
+  const lastTick  = useRef(0);
+  const rafRef    = useRef(null);
+  const [col, setCol] = useState(0);
+
+  useEffect(() => {
+    if (!isMoving) {
+      cancelAnimationFrame(rafRef.current);
+      setCol(0);
+      frameRef.current = 0;
+      return;
+    }
+
+    const tick = (ts) => {
+      if (ts - lastTick.current >= 1000 / ANIM_FPS) {
+        lastTick.current = ts;
+        frameRef.current = (frameRef.current + 1) % WALK_COLS;
+        setCol(frameRef.current);
+      }
+      rafRef.current = requestAnimationFrame(tick);
+    };
+
+    rafRef.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafRef.current);
+  }, [isMoving]);
+
+  const row = DIRECTION_ROW[facing] ?? 0;
+  const bgX = -(col  * FRAME_W * SCALE);
+  const bgY = -(row  * FRAME_H * SCALE);
+
+  return (
+    <div style={{
+      width:              RENDER_SIZE,
+      height:             RENDER_SIZE,
+      backgroundImage:    `url('/assets/spritesheet.png')`,
+      backgroundSize:     `${SHEET_W * SCALE}px ${SHEET_H * SCALE}px`,
+      backgroundPosition: `${bgX}px ${bgY}px`,
+      backgroundRepeat:   'no-repeat',
+      imageRendering:     'pixelated',
+      flexShrink:         0,
+    }} />
+  );
+}
+
 export default function WorldExploreScreen({ onNavigate }) {
   // Player state
   const [playerPos, setPlayerPos] = useState({ x: 480, y: 380 });
@@ -134,19 +208,14 @@ export default function WorldExploreScreen({ onNavigate }) {
   };
 
   // Virtual D-Pad buttons for mobile / touch
-  const handleDPadPress = (dir) => {
-    const step = 45;
-    let newX = playerPos.x;
-    let newY = playerPos.y;
-    if (dir === 'up') { newY -= step; setPlayerFacing('up'); }
-    if (dir === 'down') { newY += step; setPlayerFacing('down'); }
-    if (dir === 'left') { newX -= step; setPlayerFacing('left'); }
-    if (dir === 'right') { newX += step; setPlayerFacing('right'); }
-
-    setPlayerPos({
-      x: Math.max(80, Math.min(880, newX)),
-      y: Math.max(140, Math.min(540, newY))
-    });
+  // Uses the same keysPressed ref as keyboard so the game loop handles movement
+  const handleDPadDown = (dir) => {
+    const keyMap = { up: 'arrowup', down: 'arrowdown', left: 'arrowleft', right: 'arrowright' };
+    keysPressed.current[keyMap[dir]] = true;
+  };
+  const handleDPadUp = (dir) => {
+    const keyMap = { up: 'arrowup', down: 'arrowdown', left: 'arrowleft', right: 'arrowright' };
+    keysPressed.current[keyMap[dir]] = false;
   };
 
   return (
@@ -222,23 +291,49 @@ export default function WorldExploreScreen({ onNavigate }) {
           </div>
         ))}
 
-        {/* Controllable Player Character (Explorer Boy with Backpack) */}
+        {/* Controllable Player Character — animated sprite */}
         <div 
-          style={{ left: `${(playerPos.x / 960) * 100}%`, top: `${(playerPos.y / 600) * 100}%` }}
-          className="absolute -translate-x-1/2 -translate-y-full z-40 transition-all duration-75 pointer-events-none"
+          className="absolute z-40 pointer-events-none"
+          style={{
+            left: `${(playerPos.x / 960) * 100}%`,
+            top:  `${(playerPos.y / 600) * 100}%`,
+            transform: `translate(-${RENDER_SIZE / 2}px, -${RENDER_SIZE}px)`,
+          }}
         >
-          {/* Dynamic Shadow */}
-          <div className="w-8 h-3 bg-black/40 rounded-full blur-[1px] absolute -bottom-1 left-1/2 -translate-x-1/2"></div>
+          {/* Ground shadow */}
+          <div style={{
+            width: RENDER_SIZE * 0.55, height: RENDER_SIZE * 0.14,
+            background: 'rgba(0,0,0,0.35)',
+            borderRadius: '50%',
+            filter: 'blur(2px)',
+            position: 'absolute',
+            bottom: 2,
+            left: '50%',
+            transform: 'translateX(-50%)',
+          }} />
 
-          {/* Explorer Avatar */}
-          <div className={`relative flex flex-col items-center ${isMoving ? 'animate-bounce' : ''}`}>
-            {/* Backpack tag */}
-            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-sky-400 via-sky-600 to-amber-900 border-2 border-white shadow-xl flex items-center justify-center text-lg">
-              <img src="/assets/ved.png" alt="Ved" className="w-full h-full object-contain" style={{ filter: 'drop-shadow(0 0 1px #D4AF37) drop-shadow(0 0 4px rgba(255, 215, 106, 0.7))' }} />
-            </div>
-            <div className="px-2 py-0.5 rounded-full bg-sky-950/90 border border-sky-400 text-[9px] font-cinzel font-bold text-sky-200 shadow mt-0.5">
-              VED
-            </div>
+          {/* Sprite */}
+          <VedSprite facing={playerFacing} isMoving={isMoving} />
+
+          {/* Name tag */}
+          <div style={{
+            position: 'absolute',
+            bottom: -14,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            whiteSpace: 'nowrap',
+            padding: '1px 7px',
+            borderRadius: 999,
+            background: 'rgba(8,30,60,0.88)',
+            border: '1px solid rgba(100,180,255,0.5)',
+            fontFamily: 'Cinzel, serif',
+            fontSize: '8px',
+            fontWeight: 700,
+            color: '#bae6fd',
+            letterSpacing: '0.08em',
+            boxShadow: '0 1px 4px rgba(0,0,0,0.6)',
+          }}>
+            VED
           </div>
         </div>
       </div>
@@ -304,14 +399,18 @@ export default function WorldExploreScreen({ onNavigate }) {
         <div className="pointer-events-auto grid grid-cols-3 gap-1 bg-[#24160f]/90 p-2 rounded-2xl border border-amber-700/70 shadow-2xl backdrop-blur-sm">
           <div></div>
           <button 
-            onClick={() => handleDPadPress('up')}
+            onPointerDown={() => handleDPadDown('up')}
+            onPointerUp={() => handleDPadUp('up')}
+            onPointerLeave={() => handleDPadUp('up')}
             className="w-10 h-10 rounded-lg bg-[#4a2d1b] active:bg-amber-700 border border-amber-500/60 flex items-center justify-center text-amber-100 shadow-[0_0_8px_rgba(212,175,55,0.2)]"
           >
             <ChevronUp className="w-5 h-5" />
           </button>
           <div></div>
           <button 
-            onClick={() => handleDPadPress('left')}
+            onPointerDown={() => handleDPadDown('left')}
+            onPointerUp={() => handleDPadUp('left')}
+            onPointerLeave={() => handleDPadUp('left')}
             className="w-10 h-10 rounded-lg bg-[#4a2d1b] active:bg-amber-700 border border-amber-500/60 flex items-center justify-center text-amber-100 shadow-[0_0_8px_rgba(212,175,55,0.2)]"
           >
             <ChevronLeft className="w-5 h-5" />
@@ -320,14 +419,18 @@ export default function WorldExploreScreen({ onNavigate }) {
             MOVE
           </div>
           <button 
-            onClick={() => handleDPadPress('right')}
+            onPointerDown={() => handleDPadDown('right')}
+            onPointerUp={() => handleDPadUp('right')}
+            onPointerLeave={() => handleDPadUp('right')}
             className="w-10 h-10 rounded-lg bg-[#4a2d1b] active:bg-amber-700 border border-amber-500/60 flex items-center justify-center text-amber-100 shadow-[0_0_8px_rgba(212,175,55,0.2)]"
           >
             <ChevronRight className="w-5 h-5" />
           </button>
           <div></div>
           <button 
-            onClick={() => handleDPadPress('down')}
+            onPointerDown={() => handleDPadDown('down')}
+            onPointerUp={() => handleDPadUp('down')}
+            onPointerLeave={() => handleDPadUp('down')}
             className="w-10 h-10 rounded-lg bg-[#4a2d1b] active:bg-amber-700 border border-amber-500/60 flex items-center justify-center text-amber-100 shadow-[0_0_8px_rgba(212,175,55,0.2)]"
           >
             <ChevronDown className="w-5 h-5" />

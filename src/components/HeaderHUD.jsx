@@ -1,27 +1,228 @@
 import React, { useState } from 'react';
-import {
-  Volume2,
-  VolumeX,
-  ChevronRight,
-  Menu,
-  Sparkles,
-  Trophy,
-} from 'lucide-react';
-
+import { Volume2, VolumeX, ChevronRight, ChevronDown } from 'lucide-react';
 import sound from '../utils/SoundEngine';
 
 export const SCREENS = [
-  { id: 'intro', num: 1, title: 'Introduction' },
-  { id: 'bharat_map', num: 2, title: 'Bharat Yatra Map' },
+  { id: 'intro',       num: 1,  title: 'Introduction' },
+  { id: 'bharat_map',  num: 2,  title: 'Bharat Yatra Map' },
   { id: 'world_explore', num: 3, title: 'Indus Valley Exploration' },
-  { id: 'dialogue', num: 4, title: 'City Elder Interaction' },
-  { id: 'learn', num: 5, title: 'Urban Planning Insight' },
-  { id: 'puzzle', num: 6, title: 'Drainage System Puzzle' },
-  { id: 'decision', num: 7, title: 'City Historical Decision' },
-  { id: 'consequence', num: 8, title: 'Consequence (Before/After)' },
-  { id: 'insight', num: 9, title: 'Historical Insight' },
-  { id: 'passport', num: 10, title: 'Bharat Passport' },
+  { id: 'dialogue',   num: 4,  title: 'City Elder Interaction' },
+  { id: 'learn',      num: 5,  title: 'Urban Planning Insight' },
+  { id: 'puzzle',     num: 6,  title: 'Drainage System Puzzle' },
+  { id: 'decision',   num: 7,  title: 'City Historical Decision' },
+  { id: 'consequence',num: 8,  title: 'Consequence (Before/After)' },
+  { id: 'insight',    num: 9,  title: 'Historical Insight' },
+  { id: 'passport',   num: 10, title: 'Bharat Passport' },
 ];
+
+/* ─── Inline styles / keyframes ─── */
+const HUD_CSS = `
+  .hud-root {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+    height: 52px;
+    display: flex; align-items: stretch;
+    user-select: none; pointer-events: auto;
+    background: linear-gradient(180deg, #6b3b1a 0%, #4a240d 42%, #2e1408 100%);
+    border-bottom: 2px solid #c9912e;
+    box-shadow: 0 3px 18px rgba(0,0,0,0.75), inset 0 1px 0 rgba(255,215,100,0.22), inset 0 -1px 0 rgba(255,180,50,0.12);
+  }
+  /* Top decorative shimmer line */
+  .hud-root::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,220,100,0.5) 20%, rgba(255,240,160,0.9) 50%, rgba(255,220,100,0.5) 80%, transparent 100%);
+    pointer-events: none;
+  }
+  /* Bottom decorative shimmer line */
+  .hud-root::after {
+    content: '';
+    position: absolute; bottom: -1px; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent 0%, rgba(210,155,40,0.6) 25%, rgba(240,195,80,0.8) 50%, rgba(210,155,40,0.6) 75%, transparent 100%);
+    pointer-events: none;
+  }
+
+  /* Logo button */
+  .hud-logo {
+    display: flex; align-items: center; gap: 0; padding: 0 14px 0 10px;
+    cursor: pointer; border: none; outline: none; background: none;
+    border-right: 1px solid rgba(180,120,35,0.45);
+    transition: filter 0.18s ease;
+    position: relative;
+  }
+  .hud-logo:hover { filter: brightness(1.12); }
+  .hud-logo:hover .hud-logo-emblem { box-shadow: 0 0 14px rgba(240,185,30,0.7), inset 0 1px 2px rgba(255,255,255,0.4); }
+
+  .hud-logo-emblem {
+    width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+    background: radial-gradient(circle at 38% 32%, #f8dc85, #c48220 52%, #5e2a08 100%);
+    border: 2px solid rgba(235,190,70,0.85);
+    box-shadow: 0 0 8px rgba(220,165,25,0.45), inset 0 1px 2px rgba(255,255,255,0.35);
+    display: flex; align-items: center; justify-content: center;
+    transition: box-shadow 0.18s ease;
+    margin-right: 9px;
+  }
+  .hud-logo-emblem span { font-size: 17px; line-height: 1; color: #3a1a05; }
+
+  .hud-logo-text { display: flex; flex-direction: column; justify-content: center; line-height: 1; }
+  .hud-logo-title {
+    font-family: 'Cinzel', serif; font-weight: 900; font-size: 14px;
+    letter-spacing: 0.1em; color: #f4d070;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.6), 0 0 12px rgba(240,185,30,0.3);
+  }
+  .hud-logo-sub {
+    font-family: 'Philosopher', sans-serif; font-size: 7.5px;
+    letter-spacing: 0.2em; text-transform: uppercase; color: #d4a84e;
+    margin-top: 2px;
+  }
+
+  /* Chapter pill */
+  .hud-chapter {
+    display: flex; align-items: center; gap: 8px;
+    padding: 0 14px; border-right: 1px solid rgba(180,120,35,0.4);
+    flex-shrink: 0;
+  }
+  .hud-chapter-icon {
+    width: 28px; height: 28px; border-radius: 6px; flex-shrink: 0;
+    background: linear-gradient(145deg, #7a4520, #4a2510);
+    border: 1px solid rgba(200,145,40,0.6);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+  }
+  .hud-chapter-text { display: flex; flex-direction: column; line-height: 1; }
+  .hud-chapter-label {
+    font-family: 'Cinzel', serif; font-size: 7px; font-weight: 700;
+    color: rgba(210,165,55,0.75); text-transform: uppercase; letter-spacing: 0.14em; margin-bottom: 2px;
+  }
+  .hud-chapter-name {
+    font-family: 'Philosopher', sans-serif; font-size: 11.5px; font-weight: 700;
+    color: #f8e8b8; white-space: nowrap;
+  }
+  .hud-chapter-num {
+    font-family: 'Cinzel', serif; font-size: 11px; font-weight: 900;
+    color: #f4c84a; margin-right: 1px;
+  }
+
+  /* Stat pill shared */
+  .hud-stat {
+    display: flex; align-items: center; gap: 7px;
+    padding: 0 11px; height: 100%; flex-shrink: 0;
+    border-right: 1px solid rgba(155,100,28,0.35);
+  }
+  .hud-stat-icon {
+    width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    background: radial-gradient(circle at 40% 35%, #f5d060, #b07018 60%, #5a2e05 100%);
+    border: 1.5px solid rgba(220,170,50,0.7);
+    box-shadow: 0 0 6px rgba(210,160,20,0.35), inset 0 1px 1px rgba(255,255,255,0.3);
+  }
+  .hud-stat-body { display: flex; flex-direction: column; line-height: 1; }
+  .hud-stat-label {
+    font-family: 'Cinzel', serif; font-size: 7px; font-weight: 700;
+    color: rgba(210,165,55,0.8); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 1px;
+  }
+  .hud-stat-value {
+    font-family: 'Cinzel', serif; font-size: 11.5px; font-weight: 900;
+    color: #fde97a;
+    text-shadow: 0 0 8px rgba(240,185,30,0.5);
+  }
+
+  /* Token pill */
+  .hud-token {
+    display: flex; align-items: center; gap: 6px;
+    padding: 0 11px; height: 100%; flex-shrink: 0;
+    border-right: 1px solid rgba(155,100,28,0.35);
+  }
+  .hud-token-coin {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: radial-gradient(circle at 38% 32%, #fde97a, #c48220 55%, #5e2a08 100%);
+    border: 1.5px solid rgba(230,175,40,0.8);
+    box-shadow: 0 0 8px rgba(215,160,20,0.45), inset 0 1px 1px rgba(255,255,255,0.35);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; flex-shrink: 0;
+  }
+  .hud-token-value {
+    font-family: 'Cinzel', serif; font-size: 13px; font-weight: 900;
+    color: #fde97a; text-shadow: 0 0 8px rgba(240,185,30,0.5);
+  }
+
+  /* Sound button */
+  .hud-sound {
+    width: 40px; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    border: none; outline: none; cursor: pointer;
+    background: none;
+    border-right: 1px solid rgba(155,100,28,0.35);
+    transition: background 0.15s ease;
+    flex-shrink: 0;
+  }
+  .hud-sound:hover { background: rgba(180,120,30,0.25); }
+  .hud-sound svg { color: #f0c045; }
+
+  /* Screen jump button */
+  .hud-jump {
+    display: flex; align-items: center; gap: 6px;
+    padding: 0 14px; height: 100%;
+    border: none; outline: none; cursor: pointer; background: none;
+    transition: background 0.15s ease; flex-shrink: 0;
+  }
+  .hud-jump:hover { background: rgba(180,120,30,0.22); }
+  .hud-jump-icon {
+    width: 22px; height: 22px; border-radius: 4px;
+    background: linear-gradient(145deg, #7a4520, #4a2510);
+    border: 1px solid rgba(200,145,40,0.55);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+  }
+  .hud-jump-label {
+    font-family: 'Cinzel', serif; font-size: 10px; font-weight: 700;
+    color: #f4d070; letter-spacing: 0.08em; white-space: nowrap;
+  }
+
+  /* Dropdown */
+  .hud-dropdown {
+    position: absolute; top: calc(100% + 6px); right: 0;
+    width: 260px; max-height: 70vh; overflow-y: auto;
+    border-radius: 10px; padding: 8px;
+    background: linear-gradient(180deg, #3e2010 0%, #221005 100%);
+    border: 1px solid #c18c36;
+    box-shadow: 0 14px 36px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,220,130,0.15);
+    z-index: 100;
+  }
+  .hud-dropdown-header {
+    padding: 6px 8px 8px; border-bottom: 1px solid rgba(160,100,30,0.5);
+    display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;
+  }
+  .hud-dropdown-title {
+    font-family: 'Cinzel', serif; font-size: 9px; font-weight: 700;
+    color: #f0c855; text-transform: uppercase; letter-spacing: 0.14em;
+  }
+  .hud-dropdown-count {
+    font-family: 'Philosopher', sans-serif; font-size: 9px; color: #a08060;
+  }
+  .hud-dropdown-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 7px 10px; border-radius: 7px; cursor: pointer; border: none; outline: none;
+    background: none; width: 100%; text-align: left; transition: background 0.15s ease;
+    gap: 8px;
+  }
+  .hud-dropdown-item:hover { background: rgba(100,55,15,0.7); }
+  .hud-dropdown-item.active { background: rgba(180,110,25,0.6); }
+  .hud-dropdown-num {
+    width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Cinzel', serif; font-size: 9px; font-weight: 700;
+  }
+  .hud-dropdown-num.active { background: #3a1c08; color: #f5d477; }
+  .hud-dropdown-num.inactive { background: #2c180b; color: #d7a94c; border: 1px solid rgba(120,75,30,0.6); }
+  .hud-dropdown-name {
+    flex: 1; font-family: 'Philosopher', sans-serif; font-size: 11.5px;
+    font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .hud-dropdown-name.active { color: #2d1607; font-weight: 700; }
+  .hud-dropdown-name.inactive { color: #f1dfb0; }
+  .hud-dropdown-arrow { color: rgba(200,155,60,0.55); flex-shrink: 0; }
+`;
 
 export default function HeaderHUD({
   currentScreen,
@@ -32,456 +233,128 @@ export default function HeaderHUD({
   isAudioMuted,
   setIsAudioMuted,
 }) {
-  const [showNavDropdown, setShowNavDropdown] = useState(false);
+  const [showNav, setShowNav] = useState(false);
 
   const toggleSound = () => {
     const muted = sound.toggleMute();
     setIsAudioMuted(muted);
   };
 
-  const handleSelectScreen = (screenId) => {
+  const goTo = (id) => {
     sound.playClick();
-    onNavigate(screenId);
-    setShowNavDropdown(false);
+    onNavigate(id);
+    setShowNav(false);
   };
 
-  const currentScreenObj =
-    SCREENS.find((s) => s.id === currentScreen) || SCREENS[0];
+  const cur = SCREENS.find((s) => s.id === currentScreen) || SCREENS[0];
 
   return (
-    <header
-      className="
-        fixed
-        top-0
-        left-0
-        right-0
-        z-50
-        h-[58px]
-        sm:h-[62px]
-        flex
-        items-center
-        px-3
-        sm:px-4
-        lg:px-5
-        pointer-events-auto
-        select-none
-      "
-      style={{
-        background:
-          'linear-gradient(180deg, #5b3219 0%, #452510 48%, #32190b 100%)',
-        borderBottom: '2px solid #c99a3b',
-        boxShadow:
-          '0 3px 12px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,215,120,0.25)',
-      }}
-    >
+    <>
+      <style>{HUD_CSS}</style>
 
-      {/* Gold inner line */}
-      <div
-        className="absolute inset-x-0 bottom-0 h-[1px] pointer-events-none"
-        style={{
-          background:
-            'linear-gradient(90deg, transparent, #e4bd63 20%, #f1d98b 50%, #e4bd63 80%, transparent)',
-        }}
-      />
+      <header className="hud-root">
 
-      {/* =====================================================
-          LEFT SECTION
-      ====================================================== */}
-
-      <div className="relative z-10 flex items-center gap-2 sm:gap-3 shrink-0">
-
-        {/* Brand */}
-        <button
-          onClick={() => handleSelectScreen('intro')}
-          className="flex items-center gap-2 sm:gap-2.5 cursor-pointer group shrink-0"
-        >
-          <div
-            className="
-              w-9 h-9
-              sm:w-10 sm:h-10
-              rounded-full
-              flex items-center justify-center
-              shrink-0
-              transition-transform
-              group-hover:scale-105
-            "
-            style={{
-              background:
-                'radial-gradient(circle at 35% 30%, #f6d98b, #b67a27 55%, #5a2d0d 100%)',
-              border: '1.5px solid #e5bd63',
-              boxShadow:
-                '0 0 8px rgba(231,181,78,0.3), inset 0 1px 2px rgba(255,255,255,0.3)',
-            }}
-          >
-            <span className="text-[18px] sm:text-[19px] text-[#3a1c08] font-serif">
-              ॐ
-            </span>
+        {/* ── LOGO / HOME ── */}
+        <button className="hud-logo" onClick={() => goTo('intro')} title="Go to Home">
+          <div className="hud-logo-emblem">
+            <span>ॐ</span>
           </div>
-
-          <div className="flex flex-col justify-center leading-none">
-            <span
-              className="
-                font-cinzel
-                font-black
-                text-[13px]
-                sm:text-[15px]
-                tracking-[0.08em]
-                text-[#f4d58b]
-              "
-            >
-              KAALAYATRA
-            </span>
-
-            <span
-              className="
-                hidden
-                sm:block
-                mt-[3px]
-                font-philosopher
-                text-[8px]
-                sm:text-[9px]
-                tracking-[0.16em]
-                uppercase
-                text-[#e8c982]
-              "
-            >
-              The Living India Game
-            </span>
+          <div className="hud-logo-text">
+            <span className="hud-logo-title">KAALAYATRA</span>
+            <span className="hud-logo-sub">The Living India Game</span>
           </div>
         </button>
 
-        {/* Current screen */}
-        <div
-          className="
-            hidden
-            md:flex
-            items-center
-            gap-2
-            h-9
-            px-4
-            rounded-full
-            shrink-0
-          "
-          style={{
-            background:
-              'linear-gradient(180deg, #70431f 0%, #4b2912 100%)',
-            border: '1px solid #b98231',
-            boxShadow:
-              'inset 0 1px 0 rgba(255,225,150,0.2), 0 2px 5px rgba(0,0,0,0.4)',
-          }}
-        >
-          <span
-            className="
-              w-2 h-2 rounded-full
-              bg-[#f3c64d]
-              shadow-[0_0_6px_rgba(243,198,77,0.9)]
-            "
-          />
-
-          <span className="font-cinzel text-[11px] lg:text-xs font-bold text-[#f2d58d]">
-            {currentScreenObj.num}.
-          </span>
-
-          <span className="font-philosopher text-xs lg:text-sm text-[#fff0c5] whitespace-nowrap">
-            {currentScreenObj.title}
-          </span>
-        </div>
-      </div>
-
-      {/* =====================================================
-          RIGHT SECTION
-          THIS IS FORCED TO THE FAR RIGHT
-      ====================================================== */}
-
-      <div
-        className="
-          relative
-          z-10
-          ml-auto
-          flex
-          items-center
-          justify-end
-          gap-1.5
-          sm:gap-2
-          shrink-0
-        "
-      >
-
-        {/* KNOWLEDGE XP */}
-        <div
-          className="
-            flex
-            items-center
-            gap-1.5
-            px-2
-            sm:px-2.5
-            h-9
-            sm:h-10
-            rounded-lg
-            shrink-0
-          "
-          style={{
-            background:
-              'linear-gradient(180deg, #70411f 0%, #492711 100%)',
-            border: '1px solid #bd8735',
-            boxShadow:
-              'inset 0 1px 0 rgba(255,225,160,0.2), 0 2px 5px rgba(0,0,0,0.4)',
-          }}
-        >
-          <Sparkles className="w-4 h-4 text-[#f4ca52]" />
-
-          <div className="flex flex-col leading-none">
-            <span className="text-[8px] text-[#e8c77e] uppercase font-bold tracking-wide">
-              Knowledge
-            </span>
-
-            <span className="text-[11px] font-bold text-[#fff0b5] font-cinzel">
-              {xp} XP
-            </span>
+        {/* ── CURRENT CHAPTER ── */}
+        <div className="hud-chapter">
+          <div className="hud-chapter-icon">📜</div>
+          <div className="hud-chapter-text">
+            <span className="hud-chapter-label">Chapter / Level</span>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
+              <span className="hud-chapter-num">{cur.num}.</span>
+              <span className="hud-chapter-name">{cur.title}</span>
+            </div>
           </div>
         </div>
 
-        {/* HERITAGE XP */}
-        <div
-          className="
-            flex
-            items-center
-            gap-1.5
-            px-2
-            sm:px-2.5
-            h-9
-            sm:h-10
-            rounded-lg
-            shrink-0
-          "
-          style={{
-            background:
-              'linear-gradient(180deg, #66371c 0%, #42220f 100%)',
-            border: '1px solid #ae6f32',
-            boxShadow:
-              'inset 0 1px 0 rgba(255,225,160,0.2), 0 2px 5px rgba(0,0,0,0.4)',
-          }}
-        >
-          <Trophy className="w-4 h-4 text-[#e9b95a]" />
+        {/* ── RIGHT CLUSTER ── */}
+        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'stretch', height: '100%' }}>
 
-          <div className="flex flex-col leading-none">
-            <span className="text-[8px] text-[#e1bd7a] uppercase font-bold tracking-wide">
-              Heritage
-            </span>
-
-            <span className="text-[11px] font-bold text-[#ffe5a5] font-cinzel">
-              {heritageXp} XP
-            </span>
+          {/* KNOWLEDGE XP */}
+          <div className="hud-stat">
+            <div className="hud-stat-icon">✦</div>
+            <div className="hud-stat-body">
+              <span className="hud-stat-label">Knowledge</span>
+              <span className="hud-stat-value">{xp} XP</span>
+            </div>
           </div>
-        </div>
 
-        {/* COINS */}
-        <div
-          className="
-            flex
-            items-center
-            gap-1
-            px-2
-            sm:px-2.5
-            h-9
-            sm:h-10
-            rounded-lg
-            shrink-0
-          "
-          style={{
-            background:
-              'linear-gradient(180deg, #67401b 0%, #41250e 100%)',
-            border: '1px solid #b47b2b',
-            boxShadow:
-              'inset 0 1px 0 rgba(255,225,160,0.2), 0 2px 5px rgba(0,0,0,0.4)',
-          }}
-        >
-          <span className="text-sm">🪙</span>
+          {/* HERITAGE XP */}
+          <div className="hud-stat">
+            <div className="hud-stat-icon">🏛️</div>
+            <div className="hud-stat-body">
+              <span className="hud-stat-label">Heritage</span>
+              <span className="hud-stat-value">{heritageXp} XP</span>
+            </div>
+          </div>
 
-          <span className="text-xs sm:text-sm font-bold text-[#f8d36d] font-cinzel">
-            {tokens}
-          </span>
-        </div>
+          {/* TOKENS */}
+          <div className="hud-token">
+            <div className="hud-token-coin">🪙</div>
+            <span className="hud-token-value">{tokens}</span>
+          </div>
 
-        {/* SOUND */}
-        <button
-          onClick={toggleSound}
-          title={
-            isAudioMuted
-              ? 'Enable Sound & Ambient Music'
-              : 'Mute Audio'
-          }
-          className="
-            w-9
-            h-9
-            sm:w-10
-            sm:h-10
-            rounded-lg
-            flex
-            items-center
-            justify-center
-            transition-all
-            hover:scale-105
-            shrink-0
-          "
-          style={{
-            background:
-              'linear-gradient(180deg, #5d3518 0%, #391d0b 100%)',
-            border: '1px solid #b98132',
-            boxShadow:
-              'inset 0 1px 0 rgba(255,225,160,0.2), 0 2px 5px rgba(0,0,0,0.4)',
-          }}
-        >
-          {isAudioMuted ? (
-            <VolumeX className="w-4 h-4 text-[#b9a88c]" />
-          ) : (
-            <Volume2 className="w-4 h-4 text-[#f2c857]" />
-          )}
-        </button>
-
-        {/* SCREEN JUMP */}
-        <div className="relative shrink-0">
-          <button
-            onClick={() => setShowNavDropdown(!showNavDropdown)}
-            className="
-              flex
-              items-center
-              gap-1.5
-              h-9
-              sm:h-10
-              px-2.5
-              sm:px-3
-              rounded-lg
-              font-cinzel
-              font-semibold
-              text-[10px]
-              sm:text-xs
-              whitespace-nowrap
-              transition-all
-              hover:brightness-110
-            "
-            style={{
-              background:
-                'linear-gradient(180deg, #70451f 0%, #45250f 100%)',
-              border: '1px solid #c3943c',
-              color: '#f4d78d',
-              boxShadow:
-                'inset 0 1px 0 rgba(255,230,160,0.22), 0 2px 5px rgba(0,0,0,0.45)',
-            }}
-          >
-            <Menu className="w-3.5 h-3.5" />
-
-            <span className="hidden sm:inline">
-              SCREEN JUMP
-            </span>
-
-            <span className="text-[#f0c653] text-[10px]">
-              ▼
-            </span>
+          {/* SOUND */}
+          <button className="hud-sound" onClick={toggleSound} title={isAudioMuted ? 'Unmute' : 'Mute'}>
+            {isAudioMuted
+              ? <VolumeX style={{ width: 16, height: 16 }} />
+              : <Volume2 style={{ width: 16, height: 16 }} />}
           </button>
 
-          {/* Dropdown */}
-          {showNavDropdown && (
-            <div
-              className="
-                absolute
-                right-0
-                top-full
-                mt-2
-                w-64
-                max-h-[70vh]
-                overflow-y-auto
-                rounded-xl
-                p-2
-                z-[100]
-              "
-              style={{
-                background:
-                  'linear-gradient(180deg, #3b1f0d 0%, #241207 100%)',
-                border: '1px solid #c18c36',
-                boxShadow:
-                  '0 12px 30px rgba(0,0,0,0.75), inset 0 1px 0 rgba(255,220,140,0.15)',
-              }}
+          {/* SCREEN JUMP */}
+          <div style={{ position: 'relative' }}>
+            <button
+              className="hud-jump"
+              onClick={() => setShowNav(!showNav)}
+              title="Jump to screen"
             >
-              <div
-                className="
-                  px-2
-                  py-2
-                  mb-1
-                  border-b
-                  border-[#8a5c25]
-                  flex
-                  items-center
-                  justify-between
-                "
-              >
-                <span className="text-[10px] font-cinzel text-[#f0ca69] font-bold uppercase tracking-wider">
-                  Select Prototype Screen
-                </span>
+              <div className="hud-jump-icon">≡</div>
+              <span className="hud-jump-label">SCREEN JUMP</span>
+              <ChevronDown style={{ width: 12, height: 12, color: '#f4c84a', flexShrink: 0 }} />
+            </button>
 
-                <span className="text-[9px] text-[#a99576]">
-                  10 Steps
-                </span>
-              </div>
-
-              <div className="flex flex-col gap-1">
-                {SCREENS.map((s) => (
-                  <button
-                    key={s.id}
-                    onClick={() => handleSelectScreen(s.id)}
-                    className={`
-                      flex
-                      items-center
-                      justify-between
-                      px-2.5
-                      py-2
-                      rounded-lg
-                      text-xs
-                      font-philosopher
-                      text-left
-                      transition-all
-                      ${
-                        currentScreen === s.id
-                          ? 'bg-[#b47a29] text-[#2d1607] font-bold'
-                          : 'text-[#f1dfb0] hover:bg-[#5a3014] hover:text-[#ffd96f]'
-                      }
-                    `}
-                  >
-                    <div className="flex items-center gap-2 min-w-0">
-                      <span
-                        className={`
-                          w-5
-                          h-5
-                          rounded-full
-                          flex
-                          items-center
-                          justify-center
-                          text-[10px]
-                          font-cinzel
-                          shrink-0
-                          ${
-                            currentScreen === s.id
-                              ? 'bg-[#3a1c08] text-[#f5d477]'
-                              : 'bg-[#2c180b] text-[#d7a94c] border border-[#775021]'
-                          }
-                        `}
+            {showNav && (
+              <div className="hud-dropdown">
+                <div className="hud-dropdown-header">
+                  <span className="hud-dropdown-title">Select Screen</span>
+                  <span className="hud-dropdown-count">10 Screens</span>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  {SCREENS.map((s) => {
+                    const active = currentScreen === s.id;
+                    return (
+                      <button
+                        key={s.id}
+                        className={`hud-dropdown-item${active ? ' active' : ''}`}
+                        onClick={() => goTo(s.id)}
                       >
-                        {s.num}
-                      </span>
-
-                      <span className="truncate">
-                        {s.title}
-                      </span>
-                    </div>
-
-                    <ChevronRight className="w-3.5 h-3.5 opacity-60 shrink-0" />
-                  </button>
-                ))}
+                        <span className={`hud-dropdown-num ${active ? 'active' : 'inactive'}`}>
+                          {s.num}
+                        </span>
+                        <span className={`hud-dropdown-name ${active ? 'active' : 'inactive'}`}>
+                          {s.title}
+                        </span>
+                        <ChevronRight className="hud-dropdown-arrow" style={{ width: 13, height: 13 }} />
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
+
         </div>
-      </div>
-    </header>
+      </header>
+    </>
   );
 }

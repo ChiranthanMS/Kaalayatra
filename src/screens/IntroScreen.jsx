@@ -153,7 +153,7 @@ export default function IntroScreen({ onNavigate }) {
               onClick={handleNextToTitle}
               className="btn-gold whitespace-nowrap px-8 py-3 text-sm sm:text-base self-end sm:self-center shadow-lg flex items-center gap-2"
             >
-              <span>NEXT</span>
+              <span>CONTINUE</span>
 
               <ChevronRight className="w-5 h-5 text-amber-950" />
             </button>

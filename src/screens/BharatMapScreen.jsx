@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { MapPin, Lock, Unlock, Compass, Sparkles, ChevronRight, BookOpen, Shield } from 'lucide-react';
 import sound from '../utils/SoundEngine';
+
+const DURATION = 3000; // ms
 
 const REGIONS = [
   {
@@ -72,6 +74,10 @@ const REGIONS = [
 
 export default function BharatMapScreen({ onNavigate }) {
   const [selectedRegion, setSelectedRegion] = useState(REGIONS[0]);
+  const [loading, setLoading] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const startRef = useRef(null);
+  const rafRef   = useRef(null);
 
   const handleSelectRegion = (region) => {
     sound.playClick();
@@ -79,11 +85,28 @@ export default function BharatMapScreen({ onNavigate }) {
   };
 
   const handleEnterWorld = () => {
-    if (selectedRegion.id === 'indus_valley') {
-      sound.playReward();
-      onNavigate('world_explore');
-    }
+    if (selectedRegion.id !== 'indus_valley' || loading) return;
+    sound.playReward();
+    setLoading(true);
+    setProgress(0);
+    startRef.current = null;
   };
+
+  useEffect(() => {
+    if (!loading) return;
+    const tick = (ts) => {
+      if (!startRef.current) startRef.current = ts;
+      const pct = Math.min(((ts - startRef.current) / DURATION) * 100, 100);
+      setProgress(pct);
+      if (pct < 100) {
+        rafRef.current = requestAnimationFrame(tick);
+      } else {
+        onNavigate('world_explore');
+      }
+    };
+    rafRef.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafRef.current);
+  }, [loading, onNavigate]);
 
   return (
     <div className="relative h-full w-full overflow-hidden bg-[#28170d] text-amber-100 select-none">
@@ -228,19 +251,109 @@ export default function BharatMapScreen({ onNavigate }) {
           <div className="flex items-center justify-between gap-3 border-t-2 border-amber-800/30 bharat-map-card-actions">
             <button
               onClick={() => onNavigate('passport')}
-              className="text-xs font-cinzel font-bold text-amber-900 hover:text-amber-950 flex items-center gap-1 underline"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                fontFamily: 'Cinzel, serif',
+                fontSize: '11px',
+                fontWeight: 800,
+                letterSpacing: '0.1em',
+                textTransform: 'uppercase',
+                cursor: 'pointer',
+                border: 'none',
+                background: 'none',
+                padding: '6px 10px',
+                borderRadius: 8,
+                color: '#7a4010',
+                position: 'relative',
+                transition: 'color 0.2s ease',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.color = '#3a1604';
+                e.currentTarget.querySelector('.vp-glow').style.opacity = '1';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.color = '#7a4010';
+                e.currentTarget.querySelector('.vp-glow').style.opacity = '0';
+              }}
             >
-              <BookOpen className="w-3.5 h-3.5" /> View Passport
+              {/* Animated background glow on hover */}
+              <span className="vp-glow" style={{
+                position: 'absolute', inset: 0, borderRadius: 8,
+                background: 'linear-gradient(135deg, rgba(220,160,40,0.18), rgba(180,100,20,0.12))',
+                border: '1px solid rgba(200,140,30,0.4)',
+                opacity: 0,
+                transition: 'opacity 0.2s ease',
+                pointerEvents: 'none',
+              }} />
+
+              {/* Animated book icon */}
+              <span style={{
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                width: 22, height: 22, borderRadius: '50%', flexShrink: 0,
+                background: 'linear-gradient(145deg, #f5d060, #c47818)',
+                border: '1.5px solid rgba(230,175,40,0.8)',
+                boxShadow: '0 0 6px rgba(210,150,15,0.45)',
+                animation: 'vp-pulse 2.2s ease-in-out infinite',
+              }}>
+                <BookOpen style={{ width: 11, height: 11, color: '#3a1604' }} />
+              </span>
+
+              <span style={{ position: 'relative', zIndex: 1 }}>View Passport</span>
+
+              <style>{`
+                @keyframes vp-pulse {
+                  0%, 100% { box-shadow: 0 0 5px rgba(210,150,15,0.4); transform: scale(1); }
+                  50%       { box-shadow: 0 0 12px rgba(240,180,20,0.75); transform: scale(1.12); }
+                }
+              `}</style>
             </button>
 
             {selectedRegion.id === 'indus_valley' ? (
-              <button
-                onClick={handleEnterWorld}
-                className="btn-gold text-sm px-6 py-2.5 shadow-lg"
-              >
-                <span>ENTER WORLD</span>
-                <ChevronRight className="w-4 h-4 text-amber-950" />
-              </button>
+              loading ? (
+                /* ── Loading bar ── */
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, minWidth: 160 }}>
+                  <span style={{
+                    fontFamily: 'Cinzel, serif', fontSize: '9px', fontWeight: 700,
+                    color: 'rgba(120,60,5,0.85)', textTransform: 'uppercase', letterSpacing: '0.15em',
+                  }}>
+                    Entering World…
+                  </span>
+                  <div style={{
+                    width: '100%', height: 10, borderRadius: 999,
+                    background: 'rgba(80,40,5,0.18)',
+                    border: '1.5px solid rgba(180,110,20,0.45)',
+                    overflow: 'hidden',
+                    boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.25)',
+                  }}>
+                    <div style={{
+                      height: '100%',
+                      width: `${progress}%`,
+                      borderRadius: 999,
+                      background: 'linear-gradient(90deg, #d49f2b, #fce07a 50%, #d49f2b)',
+                      boxShadow: '0 0 8px rgba(220,160,20,0.65)',
+                      transition: 'width 0.04s linear',
+                      position: 'relative', overflow: 'hidden',
+                    }}>
+                      <div style={{
+                        position: 'absolute', inset: 0,
+                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent)',
+                        animation: 'bms-shimmer 0.9s linear infinite',
+                      }} />
+                    </div>
+                  </div>
+                  <style>{`@keyframes bms-shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(200%)}}`}</style>
+                </div>
+              ) : (
+                <button
+                  onClick={handleEnterWorld}
+                  className="btn-gold text-sm px-6 py-2.5 shadow-lg"
+                >
+                  <span>ENTER WORLD</span>
+                  <ChevronRight className="w-4 h-4 text-amber-950" />
+                </button>
+              )
             ) : (
               <button
                 disabled
